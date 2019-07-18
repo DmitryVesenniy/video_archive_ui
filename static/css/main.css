@@ -1,5 +1,5 @@
 .video__block{
-    padding-top: 10px;
+    padding-top: 20px;
 }
 .video__connect{
     width: 100%;
@@ -9,7 +9,7 @@
     padding: 2px;
 }
 .calendar__block{
-    padding-top: 20px;
+    padding-top: 10px;
 }
 .calendar__input{
     margin-bottom: 5px;
@@ -18,6 +18,11 @@
 .download__button{
     width: 100%;
     margin-top: 10px;
+}
+/*video screen block*/
+.video__screen{
+  width: 100%;
+  height: 60%;
 }
 /*error*/
 .error{
@@ -30,7 +35,49 @@
 .error__border{
     border: 1px solid #990808;
 }
-
+/*modal error*/
+#modal__error{
+  position: fixed;
+  top:2em;
+  left: 2em;
+  width: 300px;
+  padding: 15px;
+  border-radius: 10px;
+  color: #fff;
+  background-color: #990808;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  display: none;
+}
+#close{
+  width: 100%;
+  cursor: pointer;
+}
+.gliph__remove {
+  display: flex;
+  width: 12px;
+  height: 12px;
+  opacity: 0.3;
+}
+#close:hover .gliph__remove{
+  opacity: 1;
+}
+.gliph__remove:before, .gliph__remove:after {
+  position: absolute;
+  content: ' ';
+  right: 14px;
+  height: 13px;
+  width: 2px;
+  background-color: #fff;
+}
+.gliph__remove:before {
+  transform: rotate(45deg);
+}
+.gliph__remove:after {
+  transform: rotate(-45deg);
+}
 /*Loader*/
 #loader{
     position: absolute;

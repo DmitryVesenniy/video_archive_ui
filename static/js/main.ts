@@ -11,6 +11,10 @@ class AppState {
     private dateFormStart: DateForm;
     private dateFormEnd: DateForm;
 
+    //modal message
+    private modalWin: ModalWindow = new ModalWindow();
+
+
     getUrlParametrs(): any {
         const params = window.location.search.substr(1);
         const keys: any = {};
@@ -34,6 +38,9 @@ class AppState {
     }
 
     loadDocument(): void {
+        this.dateFormStart = new DateForm($('input[name="calendar_start"]'), $('input#start'));
+        this.dateFormEnd = new DateForm($('input[name="calendar_end"]'), $('input#end');
+
         const date = new Date();
         const loader = $("#loader");
         this.setDate(date);
@@ -45,6 +52,7 @@ class AppState {
         }
         this._camera = camera;
         this.setEndpointCamera();
+        this.setEndpointScreen();
         loader.hide();
     }
 
@@ -58,6 +66,36 @@ class AppState {
 
     setEndpointCamera(): void {
         $(".video__connect").attr("src", this.serviceUrl + this._camera + "/embed.html?dvr=true");
+    }
+
+    setEndpointScreen(arg: string = ""): void {
+        if ( arg ) {
+            switch ( arg ) {
+                case "start": {
+                    if ( this.dateFormStart.isValid() ) {
+                        $("#videoscreen__start").attr("src", this.createUrlSreen(this.dateFormStart));
+                    }
+                    break;
+                }
+                case "end": {
+                    if ( this.dateFormEnd.isValid() ) {
+                        $("#videoscreen__end").attr("src", this.createUrlSreen(this.dateFormEnd));
+                    }
+                }
+            }
+            return;
+        }
+        if ( this.dateFormStart.isValid() ) {
+            $("#videoscreen__start").attr("src", this.createUrlSreen(this.dateFormStart));
+        }
+
+        if ( this.dateFormEnd.isValid() ) {
+            $("#videoscreen__end").attr("src", this.createUrlSreen(this.dateFormEnd));
+        }
+    }
+
+    createUrlSreen(data: DateForm): string {
+        return this.serviceUrl + this._camera + "/" + data.getUrlTime() + "-preview.mp4";
     }
 
     notPage(): void {
@@ -94,7 +132,8 @@ class AppState {
     }
 
     clearMessage(): void {
-        $("#msg").html("");
+        this.modalWin.hide();
+        this.errorMessage = "";
 
         if ( !!this.dateFormStart ) {
             this.dateFormStart.clearError();
@@ -105,13 +144,11 @@ class AppState {
     }
 
     formErrorMessage(): void {
-        $("#msg").html(this.errorMessage);
+        this.modalWin.show(this.errorMessage);
+
     }
 
     validateForm(): boolean {
-        this.dateFormStart = new DateForm($('input[name="calendar_start"]'), $('input#start'));
-        this.dateFormEnd = new DateForm($('input[name="calendar_end"]'), $('input#end');
-
         this.errorMessage = "";
         if ( !this.dateFormStart.isValid() || !this.dateFormEnd.isValid() ) {
             this.errorMessage = "Нужно заполнить все поля с датами.";
@@ -125,6 +162,35 @@ class AppState {
     }
 }
 
+class ModalWindow {
+    private isShow: boolean = false;
+    private jqObj: any;
+    private timeObj: any;
+
+    constructor() {
+        this.jqObj = $("#modal__error");
+        this.jqObj.children("#close").on("click", (event) => {
+            this.hide();
+        });
+    }
+
+    show(msg: string): void {
+        this.jqObj.show();
+        this.jqObj.children("#msg").html(msg);
+        this.isShow = true;
+        this.timeObj = setTimeout(() => {
+            this.hide();
+        }, 3000);
+    }
+
+    hide(): void {
+        if ( this.timeObj ) {
+            clearTimeout(this.timeObj);
+        }
+        this.isShow = false;
+        this.jqObj.hide();
+    }
+}
 
 class DateForm {
     inputDay: any;
@@ -135,6 +201,9 @@ class DateForm {
     constructor(inputDay: any, inputTime: any) {
         this.inputDay = inputDay;
         this.inputTime = inputTime;
+    }
+
+    init(): void {
         this.date = new Date(this.inputDay.val() + "T" + this.inputTime.val());
     }
 
@@ -144,6 +213,7 @@ class DateForm {
     }
 
     isValid(): boolean {
+        this.init();
         if ( !this.inputDay.val() ) {
             this.inputDay.addClass("error__border");
         }
@@ -154,15 +224,31 @@ class DateForm {
         return !!this.date.valueOf();;        
     }
 
+    getUrlTime(): string {
+        if ( !this.date.valueOf() ) {
+            return "";
+        }  
+        const d: string[] = [
+            "" + this.date.getFullYear(),
+            this.date.getUTCMonth()  < 9 ? "0" + (this.date.getUTCMonth() + 1) : "" + (this.date.getUTCMonth() + 1),
+            this.date.getUTCDate() < 10 ? "0" + this.date.getUTCDate() : "" + this.date.getUTCDate(),
+            this.date.getUTCHours() < 10 ? "0" + this.date.getUTCHours() : "" + this.date.getUTCHours(),
+            this.date.getUTCMinutes() < 10 ? "0" + this.date.getUTCMinutes() : "" + this.date.getUTCMinutes(),
+            this.date.getUTCSeconds() < 10 ? "0" + this.date.getUTCSeconds() : "" + this.date.getUTCSeconds()
+        ];
+        
+        return d.join("/");
+    }
+
     getUnixTime(): number {
         const valueTime = this.date.valueOf();
         if ( valueTime ) {
-            return Math.round(valueTime/1000);
+            return valueTime/1000;
         } 
         return 0;
     }
 
     deltaTime(dateForm: DateForm): number {
-        return (this.getUnixTime() - dateForm.getUnixTime()) / 1000;
+        return this.getUnixTime() - dateForm.getUnixTime();
     }
 }

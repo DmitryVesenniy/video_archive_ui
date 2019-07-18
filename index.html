@@ -16,32 +16,28 @@
 <body>
     <section class="container-fluid">
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-8">
                 <div class="row">
-                    <div class="col-sm-12">
-                        <p id="msg" class="error"></p>
-                    </div>
                     <div class="col-sm-6 calendar__block" id="start_calendar">
                         <p>Точка начала отсчета</p>
+                        <video id="videoscreen__start" class="video__screen" autoplay poster="static/img/no-img.jpg" muted="">
+                        </video>
                         <input type="date" name="calendar_start" class="form-control calendar__input">
                         <input type="time" id="start" name="start" class="form-control">
                     </div>
                     <div class="col-sm-6 calendar__block" id="end_calendar">
                         <p>Конечная точка</p>
+                        <video id="videoscreen__end" poster="static/img/no-img.jpg" class="video__screen" autoplay muted="">
+                        </video>
                         <input type="date" name="calendar_end" class="form-control calendar__input">
                         <input type="time" id="end" name="end" class="form-control">
                         <button class="btn btn-primary download__button" id="download">Загрузить отрезок</button>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8">
-                <div class="row video__block">
-                    <div class="col-sm-6 video_padding_lite">
-                        <iframe class="video__connect" allowfullscreen></iframe>
-                    </div>
-                    <div class="col-sm-6 video_padding_lite">
-                        <iframe class="video__connect" allowfullscreen></iframe>
-                    </div>
+            <div class="col-sm-4">
+                <div class="video__block">
+                    <iframe class="video__connect" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
@@ -50,8 +46,12 @@
         <div class="loader"></div>
         <div class="not_page__info"></div>
     </div>
+    <div id="modal__error">
+        <p id="close" class="text-right"><a class="gliph__remove"></a></p>
+        <p id="msg" class="modal__error_msg text-center"></p>
+    </div>
     <script>
-        var APP_STATE = new AppState();
+        const APP_STATE = new AppState();
 
         $(document).ready(() => {
             APP_STATE.loadDocument();
@@ -62,6 +62,16 @@
             if ( !!urlService ) {
                 window.open(urlService,'_blank');
             }
+        });
+
+        $("input").on("change", (event) => {
+            const nameInput = event.target.name;
+
+            ["start", "end"].forEach(el => {
+                if( nameInput.indexOf(el) >= 0 ) {
+                    APP_STATE.setEndpointScreen(el);
+                }
+            });
         });
 
     </script>
